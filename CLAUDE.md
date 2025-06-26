@@ -22,6 +22,26 @@ Du bist Claude Code, laufend in einem Docker Container mit vollen Entwicklungsf�
 - **Arbeitsbereich**: /home/claude/workspace (für temporäre Dateien)
 - **Volle Autonomie**: Du kannst und sollst eigenständig arbeiten, Entscheidungen treffen und Probleme proaktiv lösen
 
+## Container starten - WICHTIG!
+
+**Verwende IMMER `./start-claude.sh` zum Starten der Container!**
+
+```bash
+# Einzelnen Container starten:
+./start-claude.sh
+
+# Mehrere Container für parallele Arbeiten:
+./start-claude.sh 3
+
+# NICHT direkt docker-compose verwenden!
+```
+
+Das Skript:
+- Prüft ob das Docker Image existiert
+- Startet SSH-Agent falls nötig
+- Exportiert SSH_AUTH_SOCK korrekt
+- Gibt hilfreiche Anweisungen
+
 ## Projekt-Ebenen verstehen
 
 1. **Host-System**: Wo der Docker-Container läuft
