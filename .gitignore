@@ -1,0 +1,119 @@
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Volumes - ALLES ignorieren, Punkt.
+volumes/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Temp
+tmp/
+temp/
+*.tmp
+
+# Claude Code
+.claude/*
+!.claude/settings.local.json
+
+# Docker
+docker-compose.override.yml
+docker-compose.*.yml
+!docker-compose.multi.yml
+
+# Backups
+*.bak
+*.backup
+*.old
+
+# Git merge artifacts
+*.orig
+*.rej
+*.BACKUP.*
+*.BASE.*
+*.LOCAL.*
+*.REMOTE.*
+
+# Database dumps
+*.sql
+*.dump
+*.sql.gz
+*.dump.gz
+
+# Package manager locks (optional - je nach Projekt)
+# package-lock.json
+# yarn.lock
+# composer.lock
+# Gemfile.lock
+# poetry.lock
+# Cargo.lock
+
+# Archives
+*.tar
+*.tar.gz
+*.tar.bz2
+*.zip
+*.7z
+*.rar
+
+# Vim/Emacs
+Session.vim
+.netrwhist
+*~
+\#*\#
+.\#*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.pytest_cache/
+.coverage
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# SSH Keys (falls versehentlich kopiert)
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+known_hosts
+authorized_keys
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# macOS
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Windows
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+desktop.ini
+
+# Linux
+.directory
+.Trash-*

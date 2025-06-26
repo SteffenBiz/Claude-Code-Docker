@@ -1,0 +1,142 @@
+# Git
+.git
+.gitignore
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Documentation
+README.md
+LICENSE
+docs/
+*.md
+!CLAUDE.md
+!scripts/entrypoint.sh
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+*.stackdump
+desktop.ini
+.directory
+.Trash-*
+
+# Node modules (if any local development)
+node_modules/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+venv/
+.venv/
+
+# Logs
+*.log
+
+# Test files
+test/
+tests/
+*.test.*
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/
+tmp/
+temp/
+
+# Local files
+local-*
+*.local
+*.private
+
+# Volumes (niemals ins Image!)
+volumes/
+
+# GitHub
+.github/
+
+# Git hooks
+.githooks/
+
+# Claude local settings
+.claude/
+
+# SSH keys (Sicherheit!)
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+known_hosts
+authorized_keys
+.ssh/
+
+# Database dumps
+*.sql
+*.dump
+*.sql.gz
+*.dump.gz
+
+# Archives
+*.tar
+*.tar.gz
+*.tar.bz2
+*.zip
+*.7z
+*.rar
+
+# Config files (außer docker-compose)
+*.yaml
+*.yml
+*.toml
+*.ini
+*.conf
+!docker-compose.yml
+!docker-compose.multi.yml
+
+# Git merge artifacts
+*.orig
+*.rej
+
+# Cache directories
+.cache/
+cache/
+*.cache
+
+# Backup files
+*.bak
+*.backup
+*.old
+*~
+
+# Editor files
+*.swp
+*.swo
+.*.swp
+\#*\#
+.\#*
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# Process files
+*.pid
+*.seed
+*.pid.lock

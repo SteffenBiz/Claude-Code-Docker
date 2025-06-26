@@ -1,0 +1,93 @@
+# Docker Compose für mehrere Container parallel
+# Verwendung: docker-compose -f docker-compose.multi.yml up -d --scale claude=3
+
+version: '3.8'
+
+services:
+  claude:
+    build: .
+    # Kein container_name - Docker generiert automatisch eindeutige Namen
+    hostname: claude-code-docker
+    volumes:
+      # Arbeitsverzeichnisse - Ein Mount für alle
+      - ./volumes:/home/claude/volumes
+      
+      # Projekt-Dokumentation (read-only)
+      - ./CLAUDE.md:/home/claude/CLAUDE.md:ro
+      - ./README.md:/home/claude/README.md:ro
+      - ./docs:/home/claude/docs:ro
+      - ./check-environment.sh:/home/claude/check-environment.sh:ro
+      
+      # Claude Code - Komplettes Verzeichnis vom Host
+      - ~/.claude:/home/claude/.claude
+      - ~/.claude.json:/home/claude/.claude.json
+      
+      # Git Konfiguration
+      - ~/.gitconfig:/home/claude/.gitconfig:ro
+      
+      # GitHub CLI Konfiguration
+      - ~/.config/gh:/home/claude/.config/gh:ro
+      
+      # SSH - Config und Known Hosts (Keys über SSH-Agent)
+      - ~/.ssh/config:/home/claude/.ssh/config:ro
+      - ~/.ssh/known_hosts:/home/claude/.ssh/known_hosts:ro
+      
+      # SSH-Agent Socket
+      - ${SSH_AUTH_SOCK}:/ssh-agent
+      
+      # Docker Socket für Docker-in-Docker
+      - /var/run/docker.sock:/var/run/docker.sock
+      
+    environment:
+      # SSH-Agent Socket
+      - SSH_AUTH_SOCK=/ssh-agent
+      # Git über SSH
+      - GIT_PROTOCOL=ssh
+      # MariaDB für MCP
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      # SMTP E-Mail Konfiguration
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - SMTP_FROM=${SMTP_FROM}
+      - SMTP_SECURE=${SMTP_SECURE}
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    networks:
+      - claude-network
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+  mariadb:
+    image: mariadb:latest
+    container_name: claude-mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: claude_workspace
+      MYSQL_USER: claude
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      # Daten persistent
+      - mariadb-data:/var/lib/mysql
+      # Backup Verzeichnis
+      - ./volumes/mariadb/backups:/backups
+    networks:
+      - claude-network
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+volumes:
+  mariadb-data:
+    name: claude-mariadb-data
+
+networks:
+  claude-network:
+    driver: bridge
