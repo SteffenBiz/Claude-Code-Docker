@@ -1,161 +1,279 @@
-# Claude Code Docker Environment
+# Claude Code Docker - Multi-Profile Development Environment
 
-Eine produktionsreife Docker-Umgebung für Claude Code mit vollständiger Entwicklungsumgebung, MCP-Server Integration und gemeinsamer Obsidian-Wissensdatenbank.
+Eine Docker-basierte Entwicklungsumgebung für Claude Code mit verschiedenen Entwicklungsprofilen. Bietet eine vollständig konfigurierte Arbeitsumgebung mit persistenten Volumes, Git-Integration, SSH-Agent-Weiterleitung und MariaDB.
 
-## 🎯 Was ist das?
+## 🚀 Features
 
-Dieses Projekt bietet eine vollständige Docker-basierte Entwicklungsumgebung für Claude Code mit:
-
-- **Volle Autonomie**: Claude hat sudo-Rechte für selbstständiges Arbeiten
-- **Moderne Webentwicklung**: Alle wichtigen Sprachen, Frameworks und Tools vorinstalliert
-- **MCP Server Integration**: Filesystem, GitHub API und MariaDB Zugriff
-- **Gemeinsame Wissensdatenbank**: Obsidian-basierte Dokumentation auf Deutsch
-- **Git/GitHub Integration**: SSH-Agent Forwarding für nahtlose Repository-Arbeit
-- **E-Mail-Versand**: SMTP-Unterstützung für Benachrichtigungen
-- **Docker-in-Docker**: Claude kann eigene Container verwalten
-
-## 🚀 Schnellstart
-
-```bash
-# 1. Repository klonen
-git clone https://github.com/SteffenBiz/Claude-Code-Docker.git
-cd Claude-Code-Docker
-
-# 2. Umgebung prüfen
-./check-environment.sh
-
-# 3. Konfiguration anpassen
-cp .env.example .env
-nano .env  # Passwörter ändern!
-
-# 4. Container starten
-docker-compose up -d
-
-# 5. Claude Code verwenden
-docker exec -it claude-code-docker bash
-```
+- **Multi-Profile Support**: Verschiedene Entwicklungsumgebungen (Web, Java, Python, Pentesting, Media)
+- **Persistente Speicherung**: Alle Daten bleiben zwischen Container-Neustarts erhalten
+- **SSH-Agent Integration**: Nahtlose Verwendung deiner SSH-Keys im Container
+- **Git & GitHub Integration**: Vollständig konfiguriert mit deinen Host-Einstellungen
+- **MCP Server Support**: Filesystem, GitHub und MariaDB MCP Server vorkonfiguriert
+- **MariaDB Integration**: Eigene Datenbank-Instanz für Entwicklung
+- **E-Mail Support**: SMTP-Konfiguration für E-Mail-Versand
+- **Docker-in-Docker**: Zugriff auf Docker vom Container aus
+- **Obsidian Wissensdatenbank**: Gemeinsames Gedächtnis zwischen Dir und Claude
 
 ## 📋 Voraussetzungen
 
-- Docker & Docker Compose
-- SSH-Key für GitHub (mit ssh-agent)
-- Claude Code CLI auf dem Host
+- Docker und Docker Compose installiert
+- SSH-Agent läuft (für Git/GitHub Zugriff)
+- Git konfiguriert auf dem Host
+- Claude Code CLI installiert auf dem Host
 - Optional: GitHub CLI (`gh`) authentifiziert
 
-## 🛠️ Verfügbare Tools
+## 🎯 Profile
 
-### Programmiersprachen
-- **JavaScript/TypeScript**: Node.js 20, Deno, Bun
-- **Python 3**: Mit Django, Flask, FastAPI
-- **PHP**: Mit Composer und allen Extensions
-- **Ruby**, **Go**, **Rust**
+### Web Development (`web`)
+- **Tools**: Node.js 20, Deno, Bun, PHP 8.1, Ruby, Go, Rust
+- **Frameworks**: Angular, Vue, React, Next.js, NestJS, Express
+- **Build Tools**: Webpack, Vite, Parcel, Rollup
+- **Package Manager**: npm, yarn, pnpm, Composer
+- **Testing**: Jest, Mocha, Cypress
 
-### Entwicklungstools
-- **Build**: Webpack, Vite, Parcel, Rollup
-- **Frameworks**: Angular, Vue, React, NestJS
-- **Testing**: Jest, Cypress, pytest
-- **Datenbanken**: MariaDB, PostgreSQL, Redis, SQLite
-- **Container**: Docker CLI (Host-Zugriff)
+### Java Development (`java`)
+- **JDK**: OpenJDK 11 & 17, GraalVM
+- **Build Tools**: Maven, Gradle, Ant
+- **Frameworks**: Spring Boot, Quarkus
+- **Languages**: Java, Kotlin, Scala
+- **Tools**: SDKMAN, IntelliJ IDEA (headless)
 
-## 💡 Wichtige Konzepte
+### Python Development (`python`)
+- **Version Management**: pyenv, Conda/Mamba
+- **Package Management**: pip, poetry, pipenv
+- **Data Science**: NumPy, Pandas, SciPy, Scikit-learn, Jupyter
+- **Deep Learning**: PyTorch, TensorFlow, Keras
+- **Web Frameworks**: Django, Flask, FastAPI
+- **Testing**: pytest, tox, unittest
 
-### Arbeitsverzeichnisse
-- `/volumes/workspace/` - Temporäre Dateien
-- `/volumes/repositories/` - Git Repositories
-- `/volumes/obsidian/` - Gemeinsame Wissensdatenbank
+### Penetration Testing (`pentest`)
+- **Network**: Nmap, Masscan, Wireshark
+- **Web**: Nikto, SQLMap, Burp Suite, OWASP ZAP
+- **Exploitation**: Metasploit Framework
+- **Password**: John, Hashcat, Hydra
+- **OSINT**: theHarvester, Shodan
+- ⚠️ **Hinweis**: Nur für autorisierte Sicherheitstests!
 
-### SSH-Verbindungen
-Alle SSH-Verbindungen vom Host funktionieren auch im Container:
+### Media Processing (`media`)
+- **Video**: FFmpeg, OpenCV, MoviePy
+- **Image**: ImageMagick, Pillow, GraphicsMagick
+- **Audio**: Sox, Librosa
+- **3D/Graphics**: Blender, OpenSCAD
+- **OCR**: Tesseract
+- **GPU Support**: Hardware-Beschleunigung für Video-Encoding
+
+## 🔧 Installation
+
+1. **Repository klonen**:
+   ```bash
+   git clone https://github.com/SteffenBiz/Claude-Code-Docker.git
+   cd Claude-Code-Docker
+   ```
+
+2. **Umgebung prüfen**:
+   ```bash
+   ./check-environment.sh
+   ```
+
+3. **Umgebungsvariablen konfigurieren**:
+   ```bash
+   cp .env.example .env
+   nano .env  # Passwörter ändern!
+   ```
+
+4. **MCP Server konfigurieren** (falls noch nicht geschehen):
+   - Siehe `docs/MCP-SETUP.md` für detaillierte Anleitung
+   - MCP Server werden auf dem HOST konfiguriert, nicht im Container
+
+## 🚀 Verwendung
+
+### Container starten
+
+**WICHTIG**: Verwende immer das `start-claude.sh` Skript!
+
 ```bash
-ssh myserver  # Nutzt Host SSH-Config und Keys
+# Standard (Web-Profil)
+./start-claude.sh
+
+# Spezifisches Profil
+./start-claude.sh python
+./start-claude.sh java
+./start-claude.sh pentest
+./start-claude.sh media
+
+# Mehrere Container (für parallele Arbeiten)
+./start-claude.sh web 3
+
+# Hilfe anzeigen
+./start-claude.sh -h
 ```
 
-### MCP Server
-MCP-Server werden auf dem Host konfiguriert:
-```bash
-# Auf dem Host
-claude mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem /path
+### Container betreten
 
-# Im Container verfügbar
-claude mcp list
+```bash
+# Bei einzelnem Container
+docker-compose exec claude-<profil> bash
+
+# Beispiel für Web-Profil
+docker-compose exec claude-web bash
+
+# Bei mehreren Containern
+docker ps | grep claude
+docker exec -it <container-name> bash
 ```
+
+### Claude im Container verwenden
+
+**WICHTIG**: Im Container MUSS immer `--dangerously-skip-permissions` verwendet werden:
+
+```bash
+# Im Container
+claude --dangerously-skip-permissions chat
+claude --dangerously-skip-permissions "Analysiere diesen Code"
+
+# Oder kurz mit Alias (cf = claude --dangerously-skip-permissions)
+cf chat
+cf "Erstelle eine Flask App"
+```
+
+### Container stoppen
+
+```bash
+docker-compose down
+
+# Mit Entfernung verwaister Container
+docker-compose down --remove-orphans
+```
+
+## 📁 Verzeichnisstruktur
+
+```
+claude-code-docker/
+├── dockerfiles/           # Profile-spezifische Dockerfiles
+│   ├── Dockerfile.base   # Basis-Image für alle Profile
+│   ├── Dockerfile.web    # Web-Entwicklung
+│   ├── Dockerfile.java   # Java-Entwicklung
+│   ├── Dockerfile.python # Python-Entwicklung
+│   ├── Dockerfile.pentest# Sicherheitstests
+│   └── Dockerfile.media  # Media-Verarbeitung
+├── volumes/              # Persistente Daten
+│   ├── repositories/     # Git Repositories
+│   ├── workspace/        # Arbeitsbereich
+│   ├── obsidian/         # Wissensdatenbank (Deutsch)
+│   ├── mariadb/          # Datenbank Backups
+│   └── configs/          # Profil-spezifische Configs
+│       ├── web/
+│       ├── java/
+│       ├── python/
+│       ├── pentest/
+│       ├── media/
+│       └── shared/       # Gemeinsame Configs
+├── scripts/              # Helper-Skripte
+├── docs/                 # Dokumentation
+├── CLAUDE.md            # Anweisungen für Claude
+├── docker-compose.yml    # Docker Compose Konfiguration
+├── docker-compose.multi.yml # Für mehrere Container
+├── start-claude.sh      # Start-Skript
+├── check-environment.sh # Umgebungs-Check
+└── .env                 # Umgebungsvariablen
+```
+
+## 🔍 Umgebung prüfen
+
+Im Container steht ein Check-Skript zur Verfügung:
+
+```bash
+# Im Container
+/home/claude/check-environment.sh
+
+# Für JSON-Output
+/home/claude/check-environment.sh --json
+```
+
+## 🗄️ Datenbank
+
+MariaDB läuft als separater Container:
+- Host: `mariadb`
+- Datenbank: `claude_workspace`
+- User: `claude`
+- Password: Siehe `.env`
+
+## 📧 E-Mail-Versand
+
+SMTP ist vorkonfiguriert. Im Container:
+
+```bash
+# Einfache E-Mail
+echo "Test" | mail -s "Betreff" empfaenger@example.com
+
+# Mit Python
+python3 -c "
+import yagmail
+yag = yagmail.SMTP()
+yag.send('empfaenger@example.com', 'Betreff', 'Nachricht')
+"
+```
+
+## 🧩 MCP Server
+
+Die folgenden MCP Server sind standardmäßig konfiguriert:
+- **filesystem**: Zugriff auf Volume-Verzeichnisse
+- **github**: GitHub API Integration
+- **mariadb**: Datenbank-Zugriff
+
+Details zur Konfiguration: `docs/MCP-SETUP.md`
 
 ## 📚 Obsidian Wissensdatenbank
 
 Die Wissensdatenbank ist ein **gemeinsames Gedächtnis** zwischen dir und Claude:
-- Organische Struktur, die mit den Projekten wächst
-- Qualität vor Quantität - nur wichtige Informationen
-- Auf Deutsch, gut vernetzt mit [[Wikilinks]]
+- **NUR AUF DEUTSCH** - Alle Einträge in deutscher Sprache
+- **Organische Struktur**, die mit den Projekten wächst
+- **Qualität vor Quantität** - nur wichtige Informationen
+- Gut vernetzt mit [[Wikilinks]]
 - Respektiere bestehende Notizen
 
-## 🔧 Konfiguration
+## 🛠️ Entwicklung
 
-### Environment Variables (.env)
-```env
-# Datenbank
-MYSQL_ROOT_PASSWORD=dein_root_passwort
-MYSQL_PASSWORD=dein_claude_passwort
+### Neues Profil hinzufügen
 
-# E-Mail (optional)
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_USER=user@example.com
-SMTP_PASS=smtp_passwort
-SMTP_FROM=claude@example.com
-```
+1. Erstelle `dockerfiles/Dockerfile.<profil>`
+2. Füge Service in `docker-compose.yml` hinzu
+3. Aktualisiere `start-claude.sh` mit dem neuen Profil
+4. Erstelle `volumes/configs/<profil>/` Verzeichnis
 
-### Umgebung prüfen
-```bash
-# Auf Host oder im Container
-./check-environment.sh
-```
+### Profile anpassen
 
-## 🐳 Container Management
+Die Dockerfiles in `dockerfiles/` können nach Bedarf angepasst werden. Nach Änderungen:
 
 ```bash
-# Status
-docker-compose ps
+# Image neu bauen
+docker-compose --profile <profil> build claude-<profil>
 
-# Logs
-docker-compose logs -f
-
-# Neustart
-docker-compose restart
-
-# Rebuild
-docker-compose build --no-cache
+# Oder Base-Image neu bauen
+docker build -t claude-code-docker:base -f dockerfiles/Dockerfile.base .
 ```
 
-## 🔍 Troubleshooting
+## 🐛 Fehlerbehebung
 
-**SSH-Agent funktioniert nicht?**
-```bash
-ssh-add -l  # Muss Keys zeigen
-echo $SSH_AUTH_SOCK  # Muss gesetzt sein
-```
+### Container startet nicht
+- Prüfe ob Docker läuft: `docker ps`
+- Prüfe die Logs: `docker-compose logs`
+- Stelle sicher, dass die Ports frei sind
 
-**MCP Server fehlen?**
-- MCP werden auf dem Host konfiguriert
-- Container übernimmt automatisch die Host-Konfiguration
+### SSH-Agent funktioniert nicht
+- Prüfe ob SSH-Agent läuft: `echo $SSH_AUTH_SOCK`
+- Starte SSH-Agent: `eval $(ssh-agent -s)`
+- Füge Keys hinzu: `ssh-add`
 
-**MariaDB nicht erreichbar?**
-```bash
-docker-compose exec mariadb mysql -u root -p
-```
+### MCP Server nicht erreichbar
+- Prüfe die Konfiguration auf dem Host: `~/.claude.json`
+- MCP Server müssen auf dem HOST konfiguriert werden
+- Siehe `docs/MCP-SETUP.md` für Details
 
-## 📁 Projektstruktur
-
-```
-├── docker-compose.yml    # Container-Orchestrierung
-├── Dockerfile           # Claude's Umgebung
-├── CLAUDE.md           # Anweisungen für Claude
-├── check-environment.sh # Umgebungs-Check
-├── volumes/            # Persistente Daten
-│   ├── workspace/      # Arbeitsbereich
-│   ├── repositories/   # Git Repos
-│   └── obsidian/       # Wissensdatenbank
-└── docs/               # Weitere Dokumentation
-```
+### Build dauert zu lange
+- Die vollständigen Profile enthalten viele Tools
+- Für Tests gibt es ein minimales Profil: `docker-compose --profile test build`
+- Images werden gecacht, zweiter Build ist schneller
 
 ## 🔒 Sicherheit
 
@@ -164,9 +282,19 @@ docker-compose exec mariadb mysql -u root -p
 - `.env` niemals committen!
 - Nur für Entwicklung, nicht für Produktion
 
-## 📄 Lizenz
+## 📝 Lizenz
 
-MIT License - siehe [LICENSE](LICENSE)
+MIT License - siehe LICENSE Datei
+
+## 🤝 Beitragen
+
+Pull Requests sind willkommen! Für größere Änderungen bitte erst ein Issue erstellen.
+
+## 📚 Weitere Dokumentation
+
+- [MCP Server Setup](docs/MCP-SETUP.md)
+- [Claude Anweisungen](CLAUDE.md)
+- [Erweiterte Konfiguration](docs/ADVANCED.md)
 
 ---
 

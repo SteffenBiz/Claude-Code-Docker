@@ -5,12 +5,16 @@ version: '3.8'
 
 services:
   claude:
-    build: .
+    image: claude-code-docker:${CLAUDE_PROFILE:-web}
     # Kein container_name - Docker generiert automatisch eindeutige Namen
     hostname: claude-code-docker
     volumes:
       # Arbeitsverzeichnisse - Ein Mount für alle
       - ./volumes:/home/claude/volumes
+      
+      # Profil-spezifische Konfiguration
+      - ./volumes/configs/${CLAUDE_PROFILE:-web}:/home/claude/.config/profile:ro
+      - ./volumes/configs/shared:/home/claude/.config/shared:ro
       
       # Projekt-Dokumentation (read-only)
       - ./CLAUDE.md:/home/claude/CLAUDE.md:ro
@@ -52,6 +56,8 @@ services:
       - SMTP_PASS=${SMTP_PASS}
       - SMTP_FROM=${SMTP_FROM}
       - SMTP_SECURE=${SMTP_SECURE}
+      # Profil
+      - CLAUDE_PROFILE=${CLAUDE_PROFILE:-web}
     stdin_open: true
     tty: true
     restart: unless-stopped

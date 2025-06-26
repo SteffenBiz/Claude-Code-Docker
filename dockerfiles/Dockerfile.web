@@ -1,0 +1,124 @@
+# Web Development Profile
+FROM claude-code-docker:base
+
+# Als root für Installationen
+USER root
+
+# Timezone konfigurieren
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Europe/Berlin
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Node.js Entwicklungstools - Core Tools zuerst
+RUN npm install -g \
+    typescript \
+    eslint \
+    prettier \
+    yarn \
+    pnpm
+
+# Framework CLIs
+RUN npm install -g \
+    @angular/cli \
+    @vue/cli \
+    create-react-app \
+    create-next-app \
+    @nestjs/cli \
+    express-generator
+
+# Build und Dev Tools
+RUN npm install -g \
+    webpack-cli \
+    vite \
+    parcel \
+    rollup \
+    ts-node \
+    tsx \
+    pm2 \
+    nodemon
+
+# Testing Tools (Cypress ist groß, separat installieren)
+RUN npm install -g \
+    jest \
+    mocha
+
+# Cypress separat (dauert länger)
+RUN npm install -g cypress
+
+# Deno und Bun - als claude user
+USER claude
+RUN curl -fsSL https://deno.land/install.sh | sh \
+    && echo 'export DENO_INSTALL="/home/claude/.deno"' >> ~/.bashrc \
+    && echo 'export PATH="$DENO_INSTALL/bin:$PATH"' >> ~/.bashrc
+
+RUN curl -fsSL https://bun.sh/install | bash \
+    && echo 'export BUN_INSTALL="$HOME/.bun"' >> ~/.bashrc \
+    && echo 'export PATH="$BUN_INSTALL/bin:$PATH"' >> ~/.bashrc
+USER root
+
+# PHP und Composer
+RUN sudo apt-get update && sudo apt-get install -y \
+    php8.1-cli \
+    php8.1-common \
+    php8.1-mysql \
+    php8.1-pgsql \
+    php8.1-sqlite3 \
+    php8.1-redis \
+    php8.1-gd \
+    php8.1-imagick \
+    php8.1-curl \
+    php8.1-mbstring \
+    php8.1-xml \
+    php8.1-zip \
+    php8.1-bcmath \
+    php8.1-intl \
+    composer \
+    && sudo rm -rf /var/lib/apt/lists/*
+
+# Ruby und Rails
+RUN sudo apt-get update && sudo apt-get install -y \
+    ruby-full \
+    ruby-dev \
+    && sudo gem install rails bundler \
+    && sudo rm -rf /var/lib/apt/lists/*
+
+# Go
+RUN wget -q https://go.dev/dl/go1.21.5.linux-amd64.tar.gz \
+    && sudo tar -C /usr/local -xzf go1.21.5.linux-amd64.tar.gz \
+    && rm go1.21.5.linux-amd64.tar.gz \
+    && echo 'export PATH="/usr/local/go/bin:$PATH"' >> /home/claude/.bashrc
+
+# Rust - als claude user
+USER claude
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
+    && echo 'source "$HOME/.cargo/env"' >> ~/.bashrc
+USER root
+
+# Web Server (für lokale Tests)
+RUN sudo apt-get update && sudo apt-get install -y \
+    nginx \
+    apache2 \
+    && sudo rm -rf /var/lib/apt/lists/*
+
+# Zusätzliche Python Web-Frameworks
+RUN pip3 install \
+    django \
+    flask \
+    fastapi \
+    uvicorn \
+    gunicorn \
+    poetry \
+    pipenv
+
+# Browser Testing Tools
+RUN sudo apt-get update && sudo apt-get install -y \
+    chromium-browser \
+    firefox \
+    && sudo rm -rf /var/lib/apt/lists/*
+
+# Profil-spezifische Konfiguration
+ENV CLAUDE_PROFILE=web
+
+# Zurück zu claude user
+USER claude
+WORKDIR /home/claude

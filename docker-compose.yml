@@ -1,13 +1,18 @@
 version: '3.8'
 
 services:
-  claude:
-    build: .
-    container_name: claude-code-docker
+  # Basis Service Definition für alle Profile
+  claude-base:
+    image: claude-code-docker:${CLAUDE_PROFILE:-web}
+    container_name: claude-code-docker-${CLAUDE_PROFILE:-web}
     hostname: claude-code-docker
     volumes:
       # Arbeitsverzeichnisse - Ein Mount für alle
       - ./volumes:/home/claude/volumes
+      
+      # Profil-spezifische Konfiguration
+      - ./volumes/configs/${CLAUDE_PROFILE:-web}:/home/claude/.config/profile:ro
+      - ./volumes/configs/shared:/home/claude/.config/shared:ro
       
       # Projekt-Dokumentation (read-only)
       - ./CLAUDE.md:/home/claude/CLAUDE.md:ro
@@ -49,15 +54,80 @@ services:
       - SMTP_PASS=${SMTP_PASS}
       - SMTP_FROM=${SMTP_FROM}
       - SMTP_SECURE=${SMTP_SECURE}
+      # Profil
+      - CLAUDE_PROFILE=${CLAUDE_PROFILE:-web}
     stdin_open: true
     tty: true
     restart: unless-stopped
     networks:
       - claude-network
+
+  # Web Development Profile
+  claude-web:
+    extends:
+      service: claude-base
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.web
+    profiles: ["web"]
     depends_on:
       mariadb:
         condition: service_healthy
 
+  # Java Development Profile  
+  claude-java:
+    extends:
+      service: claude-base
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.java
+    profiles: ["java"]
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+  # Python Development Profile
+  claude-python:
+    extends:
+      service: claude-base
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.python
+    profiles: ["python"]
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+  # Pentesting Profile
+  claude-pentest:
+    extends:
+      service: claude-base
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.pentest
+    profiles: ["pentest"]
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    cap_add:
+      - NET_ADMIN
+      - SYS_PTRACE
+
+  # Media Processing Profile
+  claude-media:
+    extends:
+      service: claude-base
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.media
+    profiles: ["media"]
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    devices:
+      - /dev/dri:/dev/dri  # GPU Zugriff für Video-Encoding
+
+  # MariaDB Service - für alle Profile
   mariadb:
     image: mariadb:latest
     container_name: claude-mariadb
@@ -80,6 +150,7 @@ services:
       retries: 5
       start_period: 30s
     restart: unless-stopped
+    profiles: ["web", "java", "python", "pentest", "media"]
 
 volumes:
   mariadb-data:

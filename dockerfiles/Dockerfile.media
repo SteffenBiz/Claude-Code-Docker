@@ -1,0 +1,162 @@
+# Media Processing Profile
+FROM claude-code-docker:base
+
+# Als root für Installationen
+USER root
+
+# Multimedia Libraries und Tools
+RUN sudo apt-get update && sudo apt-get install -y \
+    # Video Processing
+    ffmpeg \
+    libavcodec-extra \
+    libavformat-dev \
+    libavutil-dev \
+    libswscale-dev \
+    libavdevice-dev \
+    # Image Processing
+    imagemagick \
+    libmagickwand-dev \
+    graphicsmagick \
+    # Audio Processing  
+    sox \
+    libsox-dev \
+    lame \
+    # Image Libraries
+    libjpeg-dev \
+    libpng-dev \
+    libtiff-dev \
+    libwebp-dev \
+    libheif-dev \
+    libraw-dev \
+    # Video Libraries
+    libx264-dev \
+    libx265-dev \
+    libvpx-dev \
+    libtheora-dev \
+    # OCR
+    tesseract-ocr \
+    tesseract-ocr-deu \
+    tesseract-ocr-eng \
+    # PDF Processing
+    poppler-utils \
+    ghostscript \
+    qpdf \
+    # EXIF Tools
+    exiftool \
+    exiv2 \
+    && sudo rm -rf /var/lib/apt/lists/*
+
+# Python Media Libraries
+RUN pip3 install \
+    # Image Processing
+    pillow \
+    opencv-python \
+    scikit-image \
+    imageio \
+    rawpy \
+    # Video Processing
+    moviepy \
+    vidgear \
+    av \
+    # Audio Processing
+    librosa \
+    soundfile \
+    pydub \
+    audioread \
+    # OCR
+    pytesseract \
+    easyocr \
+    # PDF Processing
+    PyPDF2 \
+    pdfplumber \
+    reportlab \
+    # Plotting und Visualization
+    matplotlib \
+    seaborn \
+    plotly \
+    bokeh \
+    # Machine Learning für Media
+    face-recognition \
+    mediapipe \
+    transformers
+
+# Node.js Media Tools
+RUN npm install -g \
+    sharp-cli \
+    imagemin-cli \
+    svgo \
+    # Video Tools
+    @ffmpeg-installer/ffmpeg \
+    fluent-ffmpeg
+
+# Go Media Tools - als claude user
+USER claude
+RUN go install github.com/disintegration/imaging@latest \
+    && echo 'export PATH="$HOME/go/bin:$PATH"' >> ~/.bashrc
+USER root
+
+# Media Streaming Tools
+RUN sudo apt-get update && sudo apt-get install -y \
+    vlc-nox \
+    gstreamer1.0-tools \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-plugins-ugly \
+    && sudo rm -rf /var/lib/apt/lists/*
+
+# 3D und Grafik Tools
+RUN sudo apt-get update && sudo apt-get install -y \
+    blender \
+    openscad \
+    meshlab \
+    && sudo rm -rf /var/lib/apt/lists/*
+
+# Rust Media Tools - als claude user
+USER claude
+RUN cargo install \
+    oxipng \
+    svgcleaner
+USER root
+
+# MediaInfo für Metadaten
+RUN sudo apt-get update && sudo apt-get install -y \
+    mediainfo \
+    mediainfo-gui \
+    && sudo rm -rf /var/lib/apt/lists/*
+
+# YouTube-DL und Alternativen
+RUN pip3 install \
+    yt-dlp \
+    youtube-dl \
+    streamlink
+
+# Bildoptimierung Tools
+RUN sudo apt-get update && sudo apt-get install -y \
+    jpegoptim \
+    optipng \
+    pngquant \
+    gifsicle \
+    webp \
+    && sudo rm -rf /var/lib/apt/lists/*
+
+# Audio Analyse Tools
+RUN sudo apt-get update && sudo apt-get install -y \
+    aubio-tools \
+    sonic-visualiser \
+    && sudo rm -rf /var/lib/apt/lists/*
+
+# Batch Processing Scripts
+RUN mkdir -p /home/claude/media-scripts \
+    && echo '#!/bin/bash\n# Batch resize images\nfor img in *.{jpg,jpeg,png}; do\n    convert "$img" -resize 1920x1080 "resized_$img"\ndone' > /home/claude/media-scripts/batch-resize.sh \
+    && echo '#!/bin/bash\n# Convert videos to mp4\nfor video in *.{avi,mov,mkv}; do\n    ffmpeg -i "$video" -c:v libx264 -crf 23 "${video%.*}.mp4"\ndone' > /home/claude/media-scripts/batch-convert.sh \
+    && chmod +x /home/claude/media-scripts/*.sh \
+    && chown -R claude:claude /home/claude/media-scripts
+
+# Profil-spezifische Konfiguration
+ENV CLAUDE_PROFILE=media
+ENV IMAGEMAGICK_BINARY=/usr/bin/convert
+
+# Zurück zu claude user
+USER claude
+WORKDIR /home/claude

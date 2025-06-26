@@ -1,0 +1,162 @@
+# Python Development Profile  
+FROM claude-code-docker:base
+
+# Als root für Installationen
+USER root
+
+# Build dependencies für Python
+RUN sudo apt-get update && sudo apt-get install -y \
+    # Python Build Dependencies
+    libbz2-dev \
+    libffi-dev \
+    liblzma-dev \
+    libncursesw5-dev \
+    libreadline-dev \
+    libsqlite3-dev \
+    libssl-dev \
+    libxml2-dev \
+    libxmlsec1-dev \
+    tk-dev \
+    xz-utils \
+    zlib1g-dev \
+    # Scientific Computing Dependencies
+    libatlas-base-dev \
+    liblapack-dev \
+    gfortran \
+    # Image Processing
+    libjpeg-dev \
+    libpng-dev \
+    libtiff-dev \
+    libwebp-dev \
+    # Other useful libraries
+    libzmq3-dev \
+    graphviz \
+    && sudo rm -rf /var/lib/apt/lists/*
+
+# Conda/Mamba für wissenschaftliches Computing
+RUN su - claude -c "wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh && bash Miniforge3-Linux-x86_64.sh -b -p /home/claude/miniforge3 && rm Miniforge3-Linux-x86_64.sh" \
+    && echo 'export PATH="/home/claude/miniforge3/bin:$PATH"' >> /home/claude/.bashrc \
+    && su - claude -c "/home/claude/miniforge3/bin/conda init bash" \
+    && su - claude -c "/home/claude/miniforge3/bin/mamba init bash"
+
+# Python Package Management Tools
+RUN pip3 install --upgrade \
+    pip \
+    setuptools \
+    wheel \
+    build \
+    twine \
+    poetry \
+    pipenv \
+    pipx \
+    virtualenv \
+    virtualenvwrapper
+
+# Data Science und Machine Learning
+RUN pip3 install \
+    numpy \
+    pandas \
+    scipy \
+    scikit-learn \
+    matplotlib \
+    seaborn \
+    plotly \
+    jupyter \
+    jupyterlab \
+    notebook \
+    ipython \
+    statsmodels
+
+# Deep Learning Frameworks (CPU versions)
+RUN pip3 install \
+    torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu \
+    tensorflow \
+    keras \
+    jax \
+    flax
+
+# Web Frameworks und APIs
+RUN pip3 install \
+    django \
+    flask \
+    fastapi \
+    uvicorn \
+    gunicorn \
+    tornado \
+    bottle \
+    cherrypy \
+    pyramid \
+    aiohttp \
+    sanic \
+    starlette
+
+# Testing und Code Quality
+RUN pip3 install \
+    pytest \
+    pytest-cov \
+    pytest-asyncio \
+    pytest-mock \
+    unittest-xml-reporting \
+    nose2 \
+    tox \
+    black \
+    flake8 \
+    pylint \
+    mypy \
+    bandit \
+    safety \
+    isort \
+    autopep8 \
+    yapf
+
+# Datenbank und ORM
+RUN pip3 install \
+    sqlalchemy \
+    alembic \
+    peewee \
+    tortoise-orm \
+    mongoengine \
+    redis \
+    celery
+
+# Entwicklungstools
+RUN pip3 install \
+    ipdb \
+    pdbpp \
+    rich \
+    typer \
+    click \
+    fire \
+    questionary \
+    python-dotenv \
+    pydantic \
+    marshmallow
+
+# Dokumentation
+RUN pip3 install \
+    sphinx \
+    mkdocs \
+    mkdocs-material \
+    pydoc-markdown
+
+# Jupyter Kernel für andere Sprachen
+RUN pip3 install \
+    bash_kernel \
+    && python3 -m bash_kernel.install
+
+# Python Version Management als claude user
+USER claude
+RUN git clone https://github.com/pyenv/pyenv.git ~/.pyenv \
+    && echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc \
+    && echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc \
+    && echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+USER root
+
+# Profil-spezifische Konfiguration
+ENV CLAUDE_PROFILE=python
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Zurück zu claude user
+USER claude
+WORKDIR /home/claude

@@ -21,26 +21,34 @@ Du bist Claude Code, laufend in einem Docker Container mit vollen Entwicklungsf�
 - **Home-Verzeichnis**: /home/claude (WORKDIR beim Start)
 - **Arbeitsbereich**: /home/claude/workspace (für temporäre Dateien)
 - **Volle Autonomie**: Du kannst und sollst eigenständig arbeiten, Entscheidungen treffen und Probleme proaktiv lösen
+- **Aktuelles Profil**: Umgebungsvariable `CLAUDE_PROFILE` zeigt das aktive Profil (web, java, python, pentest, media)
 
 ## Container starten - WICHTIG!
 
 **Verwende IMMER `./start-claude.sh` zum Starten der Container!**
 
 ```bash
-# Einzelnen Container starten:
+# Standard Web-Profil:
 ./start-claude.sh
 
+# Spezifisches Profil:
+./start-claude.sh python
+./start-claude.sh java
+./start-claude.sh pentest
+./start-claude.sh media
+
 # Mehrere Container für parallele Arbeiten:
-./start-claude.sh 3
+./start-claude.sh web 3
 
 # NICHT direkt docker-compose verwenden!
 ```
 
 Das Skript:
+- Wählt das richtige Profil-Image
 - Prüft ob das Docker Image existiert
 - Startet SSH-Agent falls nötig
 - Exportiert SSH_AUTH_SOCK korrekt
-- Gibt hilfreiche Anweisungen
+- Gibt profil-spezifische Hinweise
 
 ## Projekt-Ebenen verstehen
 
@@ -352,13 +360,46 @@ Bei der Analyse eines neuen Repositories:
 
 ## Verfügbare Tools und Laufzeiten
 
-### Programmiersprachen
-- **JavaScript/TypeScript**: Node.js 20, Deno, Bun
-- **Python 3**: Mit Django, Flask, FastAPI, uvicorn
-- **PHP**: Mit Composer und allen wichtigen Extensions (mysql, pgsql, redis, gd, imagick, intl, etc.)
-- **Ruby**: Mit Ruby Dev Tools
-- **Go**: Golang Compiler
-- **Rust**: Mit Cargo
+**HINWEIS**: Die verfügbaren Tools hängen vom aktiven Profil ab!
+
+### Basis-Tools (alle Profile)
+- Git, Docker CLI, GitHub CLI
+- Claude Code mit MCP Servern
+- MariaDB/PostgreSQL Clients
+- Python 3 mit Basis-Packages
+- E-Mail Tools (msmtp, yagmail)
+
+### Profil-spezifische Tools
+
+**Web-Profil**:
+- JavaScript/TypeScript: Node.js 20, Deno, Bun
+- PHP 8.1 mit Composer
+- Ruby on Rails
+- Go, Rust
+- Frameworks: Angular, Vue, React, Next.js
+
+**Java-Profil**:
+- OpenJDK 11 & 17, GraalVM
+- Maven, Gradle, Ant
+- Spring Boot, Quarkus
+- Kotlin, Scala
+
+**Python-Profil**:
+- pyenv, Conda/Mamba
+- Data Science: NumPy, Pandas, Jupyter
+- ML/DL: PyTorch, TensorFlow
+- Web: Django, Flask, FastAPI
+
+**Pentest-Profil**:
+- Nmap, Metasploit, Burp Suite
+- SQLMap, Nikto, OWASP ZAP
+- John, Hashcat, Hydra
+- ⚠️ NUR für autorisierte Tests!
+
+**Media-Profil**:
+- FFmpeg, ImageMagick, OpenCV
+- Blender, Tesseract OCR
+- GPU-Unterstützung für Video
 
 ### Package Manager & Build Tools
 - **JavaScript**: npm, yarn, pnpm, bun, webpack, vite, parcel, rollup
@@ -474,18 +515,24 @@ Bei JEDEM Start des Containers oder neuer Session:
 # 1. Umgebung prüfen
 /home/claude/check-environment.sh
 
-# 2. Obsidian erkunden - Was gibt es schon?
+# 2. Aktives Profil prüfen
+echo "Aktives Profil: $CLAUDE_PROFILE"
+
+# 3. Obsidian erkunden - Was gibt es schon?
 ls -la /home/claude/volumes/obsidian/
 find /home/claude/volumes/obsidian -type f -name "*.md" | sort
 
-# 3. Letzte Änderungen verstehen
+# 4. Letzte Änderungen verstehen
 find /home/claude/volumes/obsidian -type f -name "*.md" -mtime -7 | head -20
 
-# 4. Repository-Status
+# 5. Repository-Status
 ls -la /home/claude/volumes/repositories/
 
-# 5. Workspace aufräumen wenn nötig
+# 6. Workspace aufräumen wenn nötig
 ls -la /home/claude/volumes/workspace/
+
+# 7. Profil-spezifische Konfiguration prüfen
+ls -la /home/claude/.config/profile/
 ```
 
 **REGEL**: Beginne KEINE neue Aufgabe ohne zu wissen, was zuletzt passiert ist!
